@@ -16,13 +16,68 @@ let cols, rows, oX, oY;
 let grdSprSz = 100; // 100
 let grdGap = 170;   // 200
 
-cols = 4;
+cols = 4; // vType Size
 rows = 4;
 oX = 80; // Entire Grid offset
 oY = 80;
 let rectCoors = { "x": [], "y": [] };
 
 
+function setGridType(vType){
+
+  switch (vType){
+
+    // 2x2
+    case 0: 
+      ttlPnts = 15; //100 IS GOOOCH
+      cols = 2;
+      rows = 2;
+      grdSprSz = 250; // 100
+      grdGap = 400; 
+      oX = 80;
+      oY = 80;
+      fontsize = 200;
+      yOff = 175;
+      triSz = 48;
+      sqrSz = 80;
+      cirSz = 80;
+
+    break;
+
+    // 4x4
+    case 1:
+      ttlPnts = 5;
+      cols = 4;
+      rows = 4;
+      grdSprSz = 100; // 100
+      grdGap = 170; 
+      oX = 88;
+      oY = 88;
+      fontsize = 72;
+      triSz = 28;
+      sqrSz = 40;
+      cirSz = 40;
+    break;
+
+    // 8x8
+    case 2:
+      ttlPnts = 5;
+      cols = 8;
+      rows = 8;
+      grdSprSz = 70; // 100
+      grdGap = 95; 
+      oX = 32;
+      oY = 32;
+      fontsize = 16;
+      triSz = 14;
+      sqrSz = 20;
+      cirSz = 20;
+
+    break;
+
+    default:
+  }
+}
 
 
 // LOADS FONT
@@ -30,6 +85,18 @@ function preload() {
   font = loadFont('RobotoMono-Light.ttf');
 }
 
+function mapRange(value, low1, high1, low2, high2) {
+  return Math.floor(low2 + (high2 - low2) * (value - low1) / (high1 - low1));
+}
+
+function getRndBias(min, max, bias, influence) {
+  var rnd = Math.random() * (max - min) + min,   // random in range
+      mix = Math.random() * influence;           // random mixer
+  return Math.floor(rnd * (1 - mix) + bias * mix);           // mix full range and bias
+}
+
+// console.log(mapRange(128, 0, 255, 0, 6));
+// console.log(getRndBias(0, 255, 200, 0.75));
 
 
 // HashTxt nums scale
@@ -41,41 +108,73 @@ function preload() {
 var hashPairs = [];
 var gridHashPairs = [];
 var decPairs = [];
+let tokenData = { "hashes": ["0xff3960cf0117553097997a0a3d79d8a2cebb9fa21ab311e3f1e803e3d2420fc1"] };
+
 function splitHash(dhp) {
 
-  let tokenData = { "hashes": ["0xff3960cf0117553097997a0a3d79d8a2cebb9fa21ab311e3f1e803e3d2420f01"] };
   let numHashes = tokenData.hashes.length;
-
+  // console.log(tokenData.hashes[0]);
 
   for (let i = 0; i < numHashes; i++) {
     for (let j = 0; j < 32; j++) {
       hashPairs.push(tokenData.hashes[i].slice(2 + (j * 2), 4 + (j * 2)));
     }
-  
-    gridHashPairs = ["0x"].concat(
-      hashPairs.slice(0, dhp).concat(
-        ["..."]).concat(
-          hashPairs.slice(dhp + 18, 32)
-        )
-    );
-
-    // DEBUG HASH PAIRS AND GRIDHASPAIRS
-    // console.log(hashPairs);
-    // console.log(gridHashPairs);
-
 
   }
-  // return hashPairs; 
+}
 
 
-  // NEED TO MOVE THIS FOR RANDOM VALUE GENERATOR
+function getDecPairs(){
   decPairs = hashPairs.map(x => {
     return parseInt(x, 16);
   });
-
-  // DECPAIR = 0 - 255 VALUES
-  console.log(decPairs);
+  // console.log(decPairs);
+  return decPairs // 0 - 255 values
 }
+
+
+// dhp DotHasPosition / vType change txt arr based according to grid size
+function setHashTxt(dhp, vType){
+
+  switch (vType) {
+
+    // 2x2
+    case 0:
+      gridHashPairs.push("0x", "..", "..", tokenData.hashes[0][64]+tokenData.hashes[0][65]);
+      break;
+
+    // 4x4
+    case 1:
+      gridHashPairs = ["0x"].concat(
+        hashPairs.slice(0, dhp).concat(
+          ["..."]).concat(
+            hashPairs.slice(dhp + 18, 32)
+          )
+      );
+      break;
+
+    // 8x8
+    case 2:
+      // var arr64 = [];
+      for(var i=0; i < tokenData.hashes[0].length; i++){
+        if(i == 0 || i == 1 || i == 64 || i == 65){
+        }
+        else {
+          gridHashPairs.push(tokenData.hashes[0][i])
+        }
+      }
+
+      gridHashPairs = ["0x"].concat(gridHashPairs);
+      gridHashPairs.push(tokenData.hashes[0][64] + tokenData.hashes[0][65])
+
+      // console.log(gridHashPairs);
+      break;
+
+    default:
+  }
+}
+
+
 
 
 function createGrid() {
@@ -87,7 +186,7 @@ function createGrid() {
       // stroke();
       noStroke();
 
-      // GRID SQUARES HERE!!!
+      // GRID GREEN SQUARES HERE!!!
       // fill(0, 255, 0);
       // rect(x + oX, y + oY, grdSprSz, grdSprSz);
 
@@ -106,11 +205,10 @@ let font,
     fontsize = 72;
 let yOff = 80 // Hash pairs text yOffset so the text is inside the grid squares
 function hashTxtCreate(){
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < gridHashPairs.length; i++) {
     drawHashTxt(gridHashPairs[i], rectCoors.x[i], rectCoors.y[i])   
   }
 }
-
 
 function drawHashTxt(hsh, x, y) {
 
@@ -190,14 +288,9 @@ function createShape(clr, shpPosX, shpPosY) {
 
 // PICK COLORS FOR SHAPES
 let clrs, c0, c1, c2, c3, c4, c5, c6;
-function pkClrs(cPalette) { // Change to array for different color palletes
-  // c1 = color(216, 18, 31);
-  // c2 = color(18, 46, 179);
-  // c3 = color(245, 176, 15);
-  // c4 = color(250);
+function pkClrs(cPalette) {
 
-
-  //  Cute
+  //  Kawaii
   c0 = [
     color(109, 95, 146),
     color(216, 145, 177),
@@ -257,7 +350,9 @@ function pkClrs(cPalette) { // Change to array for different color palletes
 
 function drawLine() {
   
-  var cP = floor(random(0, 6)); 
+  // var cP = floor(random(0, 6));
+  var cP = mapRange(decPairs[0], 0, 255, 0, 6); // Choses color palette
+  var cP = floor(random(0,6)) // Choses color palette
 
   for (let i = 0; i < rectCoors.x.length; i++) {
     let pnts = getPoints(rectCoors.x[i], rectCoors.y[i]);
@@ -297,10 +392,19 @@ function setup() {
   createCanvas(canvas, canvas);
   background(200);
 
-
-  var dotHashPos = random(1, 14);
+  let vType = Math.floor(random(0,3));
+  setGridType(vType)
   
-  splitHash(dotHashPos);
+
+  splitHash();
+  
+  getDecPairs();
+  console.log(decPairs)
+  
+  var dotHashPos = mapRange(decPairs[10], 0, 255, 0,13);
+  setHashTxt(dotHashPos, vType);
+
+  // console.log(gridHashPairs);
 
   // STARTS HERE   CREATES GRID >>> HASH_TXT_LOOP >>> HASH_TXT_DRAW >>> GET_POINTS_4_LINES >>>
   //                    >>> 
@@ -308,9 +412,7 @@ function setup() {
 
   drawLine();
 
-
-
-  // console.log();
+  console.log("DONE.");
 }
 
 
