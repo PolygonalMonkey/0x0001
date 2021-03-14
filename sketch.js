@@ -29,7 +29,7 @@ function setGridType(vType){
 
     // 2x2
     case 0: 
-      ttlPnts = 15; //100 IS GOOOCH
+      ttlPnts = 100; //100 IS GOOOCH
       cols = 2;
       rows = 2;
       grdSprSz = 250; // 100
