@@ -244,6 +244,7 @@ function createShape(clr, shpPosX, shpPosY) {
   let rand = floor(random(0, 6)); // Add random bias here
   // noStroke();
   // noFill();
+  strokeJoin(ROUND);
 
   switch (rand) {
     case 0:
