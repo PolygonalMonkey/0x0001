@@ -418,7 +418,7 @@ function setup() {
   createCanvas(canvas, canvas);
 
 
-  if(getOccurrence(decPairs, 7) >= 3){
+  if(getOccurrence(decPairs, 7) >= 1){
 
       switch (Math.floor(R.random_between(0,3))){
         // inverted nippon
