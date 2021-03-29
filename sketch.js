@@ -22,10 +22,11 @@ function setGridType(vType){
 
     // 2x2
     case 0: 
-      ttlPnts = Math.round(R.random_between(10,100));
+      // ttlPnts = 10; //100 IS GOOOCH
+      ttlPnts = Math.round(R.random_between(10,100)); //100 IS GOOOCH
       cols = 2;
       rows = 2;
-      grdSprSz = 250 * M; 
+      grdSprSz = 250 * M; // 100
       grdGap = 400 * M; 
       oX = 80 * M;
       oY = 80 * M;
@@ -41,7 +42,7 @@ function setGridType(vType){
       ttlPnts = 5;
       cols = 4;
       rows = 4;
-      grdSprSz = 100 * M;
+      grdSprSz = 100 * M; // 100
       grdGap = 170 * M; 
       oX = 88 * M;
       oY = 88 * M;
@@ -57,7 +58,7 @@ function setGridType(vType){
       ttlPnts = 5;
       cols = 8;
       rows = 8;
-      grdSprSz = 70 * M;
+      grdSprSz = 70 * M; // 100
       grdGap = 95 * M; 
       oX = 32 * M;
       oY = 32 * M;
@@ -95,13 +96,11 @@ function random_hash() {
   return result;
 }
 
-let tokenData = {"hash": [random_hash()]} // HASH VALUE MUST BE INSIDE THE ARRAY!!!
-// let tokenData = {"hash": ["0x0bb03779540a0a975c7895b48449f190d7cebb24e30b1c05142f68b6ff070707"]} // TEST HASH
-
-
+let tokenData = {"hash": random_hash()} // HASH VALUE FROM ART BLOCKS
 let myHash;
 myHash = [tokenData.hash]
 
+console.log(myHash[0]);
 function splitHash(dhp) {
 
   let numHash = myHash.length;
@@ -144,14 +143,13 @@ class Random {
   }
 }
 
-
 splitHash();
 getDecPairs();
 
-// let mySeed = [decPairs[0],decPairs[2],decPairs[4],decPairs[6],decPairs[8]].join("");
-let mySeed = parseInt(myHash[0].slice(0, 16), 16);
+let mySeed = [decPairs[0],decPairs[2],decPairs[4],decPairs[6],decPairs[8]].join("");
 
 let R = new Random(mySeed);
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 7 7 7 //
@@ -247,11 +245,6 @@ function drawHashTxt(hsh, x, y) {
   // textFont(font);
   textSize(fontsize);
 
-  // if( fontsize == 99){
-  //   fill(0);
-  // } else {
-  //   fill(155);
-  // }
   fill(gl.txt);
   text(hsh, x, y + yOff);
 }
@@ -278,6 +271,7 @@ function createShape(clr, shpPosX, shpPosY) {
 
   // CHOOSE RANDOME COLOR VAL
   let rand;
+
   strokeJoin(ROUND);
 
   if( gl.tf == true){
@@ -382,29 +376,31 @@ function pkClrs(cPalette) {
 
   clrs = [c0, c1, c2, c3, c4, c5, c6]
 
-  var randC = floor(R.random_between(0,3)); 
+  var randC = Math.round(R.random_between(0,2)); 
 
   return clrs[cPalette][randC] // pick a color from a pallete
 
 }
 
+var cP = Math.round(R.random_between(0,6)) // Choses color palette
 
 function drawLine() {
   
-  var cP = Math.round(R.random_between(0,6)) // Choses color palette
 
   for (let i = 0; i < rectCoors.x.length; i++) {
     let pnts = getPoints(rectCoors.x[i], rectCoors.y[i]);
 
     noStroke();
 
+    
     // CHOOSE A SHAPE TO CREATE ON LINE POINT 0
     for (let i = 0; i < pnts.x.length; i++) {
 
       // LINES
       stroke(gl.lines);
       strokeWeight(3 * M);
-      line(pnts.x[i - 2], pnts.y[i - 2], pnts.x[i], pnts.y[i]);
+      line(pnts.x[i - 2], pnts.y[i - 2], pnts.x[i], pnts.y[i],); // Toggle between these two line types?
+      // line(pnts.x[0], pnts.y[0], pnts.x[i], pnts.y[i],); 
     }
 
     // CALLS CREATE DIFFERENT SHAPES
@@ -413,15 +409,19 @@ function drawLine() {
 }
 
 
+var glClr = Math.round(R.random_between(0,2));
+var gl7 = getOccurrence(decPairs, 7);
 // MAIN SETUP START!!!!
 function setup() {
   createCanvas(canvas, canvas);
+  
 
 
-  if(getOccurrence(decPairs, 7) >= 1){
 
-      switch (Math.floor(R.random_between(0,3))){
-        // inverted nippon
+  if(gl7 >= 1){
+
+      switch (glClr){
+        // times
         case 0:
           gl.tf    =  true;
           gl.txt   =  color(255);
@@ -451,16 +451,47 @@ function setup() {
   
   }
 
+
   background(gl.bg);
 
   let vType = mapRange(decPairs[31],0,255,0,2);
+  // console.log("vT", vType);
   setGridType(vType) //TypeHere
   
   
-  let dotHashPos = mapRange(decPairs[30], 0, 255, 0,13);
+  var dotHashPos = mapRange(decPairs[30], 0, 255, 0,13);
   setHashTxt(dotHashPos, vType); //vType Here
 
   createGrid();
 
   drawLine();
+
+  results(vType, gl7, );
+
+  console.log("DONE.");
+}
+
+
+function results(vT, gl7, tf){
+  var rst;
+  
+  rst = {
+    "gridSize": ["2x2", "4x4", "8x8"],
+    "palette":  ["Kawaii", "Snake", "Coral", "Sunrise", "Melody", "Psychadelic", "Sunset"],
+    "rType":     ["Inverted Nippon", "Terminal", "Scrambled"]
+  }
+
+  if(gl7 >= 1){
+    console.log(
+      rst.gridSize[vT] + " | " +
+      rst.rType[glClr]
+      )
+  } else {
+    console.log(
+      rst.gridSize[vT] + " | " +
+      rst.palette[cP]
+      )
+  }
+
+  // console.log(rst);
 }
